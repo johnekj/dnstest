@@ -58,22 +58,25 @@ function Calculate-Stats {
         $errors = @($group.Group | Where-Object {$_.Status -eq "ERROR"}).Count
         $ok = $total - $errors
 
-        $latencies = $group.Group | Where-Object {$_.LatencyMs -gt 0} | Select-Object -ExpandProperty LatencyMs
+        $latencies = @(
+            $group.Group |
+            Where-Object { [double]$_.LatencyMs -gt 0 } |
+            ForEach-Object { [double]$_.LatencyMs }
+        )
 
-        $avg = if ($latencies.Count -gt 0) {
-            [math]::Round(($latencies | Measure-Object -Average).Average,2)
-        } else { 0 }
+        if ($latencies.Count -gt 0) {
+            $avg = [math]::Round(($latencies | Measure-Object -Average).Average,2)
+            $min = ($latencies | Measure-Object -Minimum).Minimum
+            $max = ($latencies | Measure-Object -Maximum).Maximum
+        } else {
+            $avg = 0
+            $min = 0
+            $max = 0
+        }
 
-        $min = if ($latencies.Count -gt 0) {
-            ($latencies | Measure-Object -Minimum).Minimum
-        } else { 0 }
-
-        $max = if ($latencies.Count -gt 0) {
-            ($latencies | Measure-Object -Maximum).Maximum
-        } else { 0 }
-
+        $total = $group.Count
         $uptime = if ($total -gt 0) {
-            [math]::Round(($ok / $total) * 100,2)
+            [math]::Round((($total - $errors) / $total) * 100,2)
         } else { 0 }
 
         $output += "DNS: $($group.Name) | avg=${avg}ms | min=${min} | max=${max} | uptime=${uptime}% ($errors/$total errors)"
