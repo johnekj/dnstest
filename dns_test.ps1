@@ -47,7 +47,7 @@ function Test-DNS {
 
 function Calculate-Stats {
 
-    $data = Import-Csv $resultsFile
+    $data = Get-Content $resultsFile | ConvertFrom-Csv
     $grouped = $data | Group-Object DNS
 
     $output = @()
@@ -55,7 +55,7 @@ function Calculate-Stats {
     foreach ($group in $grouped) {
 
         $total = $group.Count
-        $errors = ($group.Group | Where-Object {$_.Status -eq "ERROR"}).Count
+        $errors = @($group.Group | Where-Object {$_.Status -eq "ERROR"}).Count
         $ok = $total - $errors
 
         $latencies = $group.Group | Where-Object {$_.LatencyMs -gt 0} | Select-Object -ExpandProperty LatencyMs
@@ -110,10 +110,8 @@ while ($true) {
         Write-Host "$domain | $($r.DNS) | $($r.Status) | $($r.Latency)ms"
     }
 
-    # statystyki co ~10 cykli
-    if ((Get-Random -Minimum 1 -Maximum 11) -eq 3) {
-        Calculate-Stats
-    }
+    # statystyki
+    Calculate-Stats
 
     Start-Sleep -Seconds 120
 }
