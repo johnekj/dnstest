@@ -1,8 +1,10 @@
-$domainsFile = "C:\dnstest\domains.txt"
-$resultsFile = "C:\dnstest\results.csv"
-$statsFile   = "C:\dnstest\stats.txt"
-$resultsFileTCP = "C:\dnstest\results_tcp.csv"
-$statsFileTCP   = "C:\dnstest\stats_tcp.txt"
+$basePath = $PSScriptRoot
+
+$domainsFile    = Join-Path $basePath "domains.txt"
+$resultsFile    = Join-Path $basePath "results.csv"
+$resultsFileTCP = Join-Path $basePath "results_tcp.csv"
+$statsFile      = Join-Path $basePath "stats.txt"
+$statsFileTCP   = Join-Path $basePath "stats_tcp.txt"
 
 $dnsServers = @(
     "system",
@@ -11,6 +13,18 @@ $dnsServers = @(
     "1.1.1.1",
     "1.0.0.1"
 )
+
+Write-Host "Base path: $basePath"
+Write-Host "Domains file: $domainsFile"
+
+if (!(Test-Path $basePath)) {
+    New-Item -ItemType Directory -Path $basePath | Out-Null
+}
+
+if (!(Test-Path $domainsFile)) {
+    Write-Host "Brak pliku domains.txt w $basePath" -ForegroundColor Red
+    exit
+}
 
 $domains = Get-Content $domainsFile
 
