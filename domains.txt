@@ -12,7 +12,7 @@ cloudflare.com
 netflix.com
 bing.com
 yahoo.com
-reddit.com
+www.reddit.com
 twitch.tv
 openai.com
 github.com
